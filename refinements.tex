@@ -29,27 +29,33 @@
 \renewcommand{\baselinestretch}{1.33}
 \frenchspacing
 
-\title{Order-aware refinements}
+\title{Ordered refinements}
 
 \begin{document}
 
 \maketitle
 
+\begin{abstract}
+  We present an alternative view of refinements in Kappa.
+  It is a more algorithmic view that can be implemented efficiently.
+  We show how the thermodynamic growth policy
+  can be rephrased in this setting,
+  resulting in smaller refinements.
+  However this approach breaks the cognitively pleasing symmetries
+  that the previous setting generates.
+  We propose that the smallest and symmetric set of refinements
+  can be obtained by taking the intersection of all ordered refinements.
+\end{abstract}
+
 \section{Refinements}
 
 % TODO: talk about order assignments before and parametrise \gp by it
 % extension have been constructed by the order
-An extension is an epi in $\rSGe_C$.
-An (order-aware) growth policy $\gp_g$ is a function
-that takes an extension $\phi: g \to h$
-and a total order $<$ defined on
-% $(\sites_{\anon{h}} \cup \links_{\anon{h}}) \setminus
-% (\phi(\sites_{\anon{g}}) \cup \phi(\links_{\anon{g}}))$
-$X := \sites_{\anon{h}} \setminus \phi(\sites_{\anon{g}})$
-and returns a map from agents $u$ in $h$
-to a subset of the sites it can define
-according to the contact graph,
-\ie $\sitemap^{-1}_C(h_\agents(u))$.
+An extension $\phi: g \to h$ is an epi in $\rSGe_C$.
+We build an extension by adding sites, agents and links
+in a certain order.
+This order can be recapitulated by a total order $<$ on new sites
+$X := \sites_{\anon{h}} \setminus \phi(\sites_{\anon{g}})$.
 Intuitevely, $<$ is the order in which sites in $h$
 have been added by the extension $\phi$
 (thus we only order those not in $g$).
@@ -69,10 +75,13 @@ and iv) $x_i < x_{i+1}$ for all $0 \leq i < n$.
 % there is a site $z$ in $X$ % $\sites_{\anon{h}}$
 % that is bound to $y$ or belongs to the same agent as $y$
 % and $x < z$ or $x = z$. % or $z$ in $\phi(\sites_{\anon{g}})$.
-In addition,
-we require that the least element of $X$ according to $<$
-be connected to a site in $\phi_\sites(\sites_{\anon{g}})$
-or belong to an agent in $\phi_\agents(\agents_{\anon{g}})$.
+% In addition,
+% we require that the least element of $X$ according to $<$
+% be connected to a site in $\phi_\sites(\sites_{\anon{g}})$
+% or belong to an agent in $\phi_\agents(\agents_{\anon{g}})$.
+% TODO: downward closed set (for partial order)
+% "they include the old points as an initial segment" (for total orders)
+% $f$ is called rigid
 We say a subset $Y$ of $X$ is minimal with respect to $<$
 if whenever $x < y$ for some $y \in Y$ then $x \in Y$. % as well.
 % there is a $z \in Y$ such that $x = z$.
@@ -87,13 +96,24 @@ and such that $f(X) \subseteq X'$ is minimal with respect to $<'$.
 % We simply write $< \,\sqsubseteq\, <'$
 % if there is such an injection.
 
-% \pagebreak
+% TODO: choose one assigment of orders and say we are only
+% interested in the embeddings that are rigid with respect to the order
 
+An (order-aware) growth policy $\gp_g$ is a function
+that takes an extension $\phi: g \to h$
+and a total order $<$ defined on
+% $(\sites_{\anon{h}} \cup \links_{\anon{h}}) \setminus
+% (\phi(\sites_{\anon{g}}) \cup \phi(\links_{\anon{g}}))$
+$X := \sites_{\anon{h}} \setminus \phi(\sites_{\anon{g}})$
+and returns a map from agents $u$ in $h$
+to a subset of the sites it can define
+according to the contact graph,
+\ie $\sitemap^{-1}_C(h_\agents(u))$.
 % We say an extension $\phi: g \to h$ is \emph{immature}
 % for the order $<$ according to $\gp_g$ if
 We classify pairs $(\phi: g \to h, <)$ according to $\gp_g$ as usual
 \begin{enumerate}[label={(\roman*)}]
-\item \emph{immature} if for all agents $u$ in $\agents_{\anon{h}}$,
+\item \emph{growing} if for all agents $u$ in $\agents_{\anon{h}}$,
   $h_\sites(\sitemap^{-1}_{\anon{h}}(u)) \subseteq \gp_g(\phi, <)$,
 \item \emph{mature} if for all agents $u$
   the inclusion is an equality, and
@@ -355,6 +375,8 @@ and every other extension is overgrown.
   resulting in an epi $\psi': g \to n$.
   Let us further restrict $n$ by removing
   (i) all sites not requested by the growth policy and
+  % if it's a free site no problem
+  % if it's bound, path-continuity
   (ii) all agents that have no sites requested by the growth policy.
   Call the result $o$.
   It has the same number of connected components as $g$
@@ -387,6 +409,11 @@ at agent $u$ in $\agents_{\anon{g}}$ iff either
 \item $u = \phi_\agents(u_0)$ and $z = \phi_\sites(z_0)$
   for some $u_0$ in $\agents_{\anon{r_L}}$ and
   $z_0$ in $\sites_{\anon{r_L}}$; or
+% TODO: glue only at the beginning and at each extension
+% push forward the glueing to \phi_1
+% (there's a unique push-forward if there is one?
+% sometimes there's no push-forward because we excluded
+% that minimal glueing in the extension)
 \item $\phi$ factorises as $\phi_2\,\phi_1$
   % with $\phi_1: r_L \to g_1$, $\phi_2: g_1 \to g$
   such that $\omega(\phi_1) \sqsubseteq \omega(\phi)$
@@ -504,7 +531,7 @@ that is, $\gp^\shapes(\phi)(u) = \gp(\phi)(u)
   % g_{2,\sites}(\sites_{\anon{g_2}})$.
   (The argument really is the same as in non-ordered refinements,
   we just need to check the orders are OK
-  but they are by assumption ...)
+  but they are by definition ...)
 \end{proof}
 
 
