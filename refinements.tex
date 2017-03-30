@@ -23,6 +23,10 @@
 \newcommand{\edges}{\mathcal{E}}
 \newcommand{\comatch}[1]{#1^\star}
 \newcommand{\inv}[1]{#1^\dagger}
+\newcommand{\rfns}[1]{\overline{#1}}
+\newcommand{\ord}{\omega}
+\newcommand{\egp}{\gp^\shapes}
+\newcommand{\ogp}{\gp_\ord}
 
 \tikzstyle{onarrow}=[fill=White,inner sep=2pt]
 
@@ -49,16 +53,15 @@
 
 \section{Refinements}
 
-% TODO: talk about order assignments before and parametrise \gp by it
-% extension have been constructed by the order
 An extension $\phi: g \to h$ is an epi in $\rSGe_C$.
 We build an extension by adding sites, agents and links
 in a certain order.
-This order can be recapitulated by a total order $<$ on new sites
-$X := \sites_{\anon{h}} \setminus \phi(\sites_{\anon{g}})$.
-Intuitevely, $<$ is the order in which sites in $h$
-have been added by the extension $\phi$
-(thus we only order those not in $g$).
+Given the extension $\phi: g \to h$,
+it is enough to specify the (total) order $<$ on new sites
+$X := \sites_{\anon{h}} \setminus \phi_\sites(\sites_{\anon{g}})$
+to recontruct the order in which
+sites, agents and links have been added.
+Note that only those sites not in the image of $g$ are ordered.
 Because sites can only be added after
 the agent they belong to
 or the site they are bound to,
@@ -71,98 +74,84 @@ iii) $x_i,x_{i+1}$ ($0 \leq i < n$)
 are either connected ($(x_i,x_{i+1}) \in \edges_{\anon{h}}$)
 or belong to the same agent ($\sitemap(x_i) = \sitemap(x_{i+1})$),
 and iv) $x_i < x_{i+1}$ for all $0 \leq i < n$.
-% whenever $x < y$ ($x,y \in X$), % $x < y$ implies
-% there is a site $z$ in $X$ % $\sites_{\anon{h}}$
-% that is bound to $y$ or belongs to the same agent as $y$
-% and $x < z$ or $x = z$. % or $z$ in $\phi(\sites_{\anon{g}})$.
-% In addition,
-% we require that the least element of $X$ according to $<$
-% be connected to a site in $\phi_\sites(\sites_{\anon{g}})$
-% or belong to an agent in $\phi_\agents(\agents_{\anon{g}})$.
-% TODO: downward closed set (for partial order)
-% "they include the old points as an initial segment" (for total orders)
-% $f$ is called rigid
-We say a subset $Y$ of $X$ is minimal with respect to $<$
-if whenever $x < y$ for some $y \in Y$ then $x \in Y$. % as well.
-% there is a $z \in Y$ such that $x = z$.
-Given $<,<'$ orders on $X,X'$,
+% https://en.wikipedia.org/wiki/Initial_segment
+A subset $X$ of $Y$ is an \emph{initial segment} of $(Y,<)$
+if, whenever $y < x$ for some $x \in X$ and $y \in Y$,
+then $y \in X$.
+An injection $f: X \to Y$ is \emph{rigid} % wrt $<$
+if $f(X)$ is an initial segment of $(Y,<)$.
+Given $(X,<)$ and $(X',<')$,
 we write $< \,\sqsubseteq_f\, <'$ if
 $f$ is an injection of $X$ into $X'$
 that preserves the order
 ($f(x) < f(y)$ if $x < y$ for all $x,y \in X$)
-and such that $f(X) \subseteq X'$ is minimal with respect to $<'$.
-% and such that there is no $x'$ in $X' \setminus f(X)$
-% smaller than $f(x)$ for all $x$ in $X$.
-% We simply write $< \,\sqsubseteq\, <'$
-% if there is such an injection.
+and is rigid.
 
-% TODO: choose one assigment of orders and say we are only
-% interested in the embeddings that are rigid with respect to the order
-
-An (order-aware) growth policy $\gp_g$ is a function
-that takes an extension $\phi: g \to h$
-and a total order $<$ defined on
-% $(\sites_{\anon{h}} \cup \links_{\anon{h}}) \setminus
-% (\phi(\sites_{\anon{g}}) \cup \phi(\links_{\anon{g}}))$
-$X := \sites_{\anon{h}} \setminus \phi(\sites_{\anon{g}})$
-and returns a map from agents $u$ in $h$
-to a subset of the sites it can define
-according to the contact graph,
-\ie $\sitemap^{-1}_C(h_\agents(u))$.
-% We say an extension $\phi: g \to h$ is \emph{immature}
-% for the order $<$ according to $\gp_g$ if
-We classify pairs $(\phi: g \to h, <)$ according to $\gp_g$ as usual
-\begin{enumerate}[label={(\roman*)}]
-\item \emph{growing} if for all agents $u$ in $\agents_{\anon{h}}$,
-  $h_\sites(\sitemap^{-1}_{\anon{h}}(u)) \subseteq \gp_g(\phi, <)$,
-\item \emph{mature} if for all agents $u$
-  the inclusion is an equality, and
-  % and $\phi$ is an epi. % TODO: define extensions as epi?
-\item \emph{overgrown} otherwise.
-\end{enumerate}
-$\gp_g$ must satisfy,
-for all pairs $(\phi, <), (\phi', <')$ such that
-$\psi \, \phi = \phi'$ for some $\psi$ and
-$< \,\sqsubseteq_{\psi_\sites}\, <'$,
-% for all $\phi \leq \phi'$ with $\psi \, \phi = \phi'$
-% and orders $<,<'$ such that $< \,\sqsubseteq_{\psi_\sites}\, <'$,
-the \emph{local faithfulness} property,
-$\gp_g(\phi, <) = \gp_g(\phi', {<'}) \, \psi_\agents$.
-In words, this property mandates that site requests
-% to be remembered when we further extend pairs $(\phi, <)$.
-are carried over when we further extend pairs $(\phi, <)$.
-
-Different orders can request different sites
-for the same extension $\phi$.
-We would like to find those orders
-that request the least amount of sites.
-Unfortunately we would have to
-try all possible orders to find the minimum,
-so instead we will define growth policies
-for which any order is good enough.
+We refer to the pair $(\phi,<)$
+as an ordered extension.
 To each extension $\phi: g \to h$
-we will assign an order $\omega(\phi)$
-and only use this order to determine the site requests at $h$.
-The assignment $\omega$ must be \emph{consistent}
+we will assign an order $\ord(\phi)$,
+which we also write as $<_\phi$ sometimes.
+% and only use this order to determine the site requests at $h$.
+The assignment $\ord$ must be \emph{consistent}
 in the sense that further extensions of $\phi$
-% must extend the order $<$,
-must respect the order $<$,
+must preserve the order $<_\phi$,
 that is, for all $\phi'$ such that $\psi\,\phi = \phi'$
 for some $\psi$, the function $\psi_\sites$ mapping the sites
 in the image of $\phi$ to those in the image of $\phi'$
 must be order-preserving.
-% that is, if $\phi \leq \phi'$ with $\psi\,\phi = \phi'$
-% and $\psi_\sites(\sites_{\anon{h}} \setminus
-% \phi_\sites(\sites_{\anon{g}}))$
-% is minimal with respect to $\omega(\phi')$
-% then $\omega(\phi) \sqsubseteq_{\psi_\sites} \omega(\phi')$.
-% then $\psi_\sites$ is order-preserving.
-% preserves the order $\omega(\phi)$ into $\omega(\phi')$.
-We write $\gp_g(\omega)$ for the set of mature extensions of $g$
-given by $\gp_g$ and $\omega$.
+An ordered extension $(\phi: g \to h, <_\phi)$
+is further extended by an embedding $\psi: h \to h'$
+if $<_\phi \,\sqsubseteq_{\psi_\sites}\, <_{\phi'}$
+with $\phi' = \psi\,\phi$.
+
+% TODO: choose one assigment of orders and say we are only
+% interested in the embeddings that are rigid with respect to the order
+% take subcategory of rigid embeddings
+
+An ordered growth policy $\ogp$ is a function
+that takes an ordered extension $(\phi: g \to h, <_\phi)$
+and returns a map from agents $u$ in $h$
+to a subset of the sites it can define
+according to the contact graph,
+\ie $\sitemap^{-1}_C(h_\agents(u))$.
+We classify pairs $(\phi: g \to h, <_\phi)$ according to $\ogp$ as usual
+\begin{enumerate}[label={(\roman*)}]
+\item \emph{growing} if for all agents $u$ in $\agents_{\anon{h}}$,
+  $h_\sites(\sitemap^{-1}_{\anon{h}}(u)) \subseteq \ogp(\phi, <_\phi)$,
+\item \emph{mature} if for all agents $u$
+  the inclusion is an equality, and
+\item \emph{overgrown} otherwise.
+\end{enumerate}
+$\ogp$ must satisfy,
+% for all ordered extensions $(\phi', <')$
+% that further extend $(\phi, <)$,
+% with $\psi \, \phi = \phi'$,
+for all ordered extensions $(\phi, <)$, $(\phi', <')$
+such that $\psi \, \phi = \phi'$ for some $\psi$
+and $< \,\sqsubseteq_{\psi_\sites}\, <'$,
+the \emph{local faithfulness} property,
+$\ogp(\phi, <) = \ogp(\phi', {<'}) \, \psi_\agents$.
+In words, this property mandates that site requests
+are carried over when we further extend pairs $(\phi, <)$.
+% ordered extensions.
+%
+% TODO: integrate the following paragraph
+% Different orders can request different sites
+% for the same extension $\phi$.
+% We would like to find those orders
+% that request the least amount of sites.
+% Unfortunately we would have to
+% try all possible orders to find the minimum,
+% so instead we will define growth policies
+% for which any order is good enough.
+%
+We write $\rfns{\ogp}$ for the set of mature extensions of $g$
+given by the growth policy $\ogp$. % and order assigment $\omega$.
+% and the order $<_\phi$ on extensions $\phi$ of $g$.
 We will prove that
-for any consistent assignment $\omega$, % of orders to extensions,
-the set of mature extensions $\set{\phi_i: g \to h_i}$
+for any consistent assignment of orders $\omega$, % to extensions,
+the set of mature extensions $\rfns{\ogp} = \set{\phi_i: g \to h_i}$
 % determined by a growth policy
 \emph{uniquely decomposes} $g$,
 \ie for every mixture $m$ and embedding $\psi: g \to m$,
@@ -170,31 +159,30 @@ there exists a unique $i$ and $\psi'$
 such that $\psi = \psi' \, \phi_i$.
 
 To have a non-empty set of refinements,
-we ask $\gp_g$ to at least contain the sites already in $g$,
+we ask $\ogp$ to at least contain the sites already in $g$,
 that is, for all agents $u$ in $\agents_{\anon{g}}$,
 $g_\sites(\sitemap_{\anon{g}}^{-1}(u)) \subseteq
-\gp_g(\id_g, \varnothing)(u)$
+\ogp(\id_g, \varnothing)(u)$
 with $\id_g$ the identity on $g$.
 If $g_\sites(\sitemap_{\anon{g}}^{-1}(u)) =
-\gp_g(\id_g, \varnothing)(u)$,
+\ogp(\id_g, \varnothing)(u)$,
 the identity $\id_g$ is mature
 and every other extension is overgrown.
 
 \begin{lemma}
   \label{lem:inj}
   Let $g$ and $s$ be contact maps over $C$,
-  $\gp_g$ a growth policy for $g$,
-  and $\omega$ a consistent assignment of orders
-  to extensions of $g$.
+  $\ord$ a consistent assignment of orders to extensions of $g$
+  and $\ogp$ a growth policy for $g$.
   Given two mature extensions
-  $\phi_1: g \to h_1$, $\phi_2: g \to h_2$ in $\gp_g(\omega)$
+  $\phi_1: g \to h_1$, $\phi_2: g \to h_2$ in $\rfns{\ogp}$
   and a cospan $\gamma_1: h_1 \to s \gets h_2 :\gamma_2$
   such that $\gamma_1\,\phi_1 = \gamma_2\,\phi_2$,
   then $\phi_1 = \phi_2$.
   % then the mediating arrow $\phi$ of
   % the pullback of $\gamma_1,\gamma_2$ is an epi
-  % and $\omega(\phi_1) \sqsupseteq \omega(\phi)
-  % \sqsubseteq \omega(\phi_2)$.
+  % and $\ord(\phi_1) \sqsupseteq \ord(\phi)
+  % \sqsubseteq \ord(\phi_2)$.
   \begin{center}
     \begin{tikzpicture}[every node/.style={outer sep=3pt}]
       \node (g) at (3,5.5) {$g$};
@@ -222,22 +210,14 @@ and every other extension is overgrown.
   \end{center}
 \end{lemma}
 \begin{proof}
-  % Assume $\phi$ is not an epi.
-  % Morphisms $\pi_1,\pi_2$ must not be isos
-  % as otherwise $\phi \cong \phi_1 \cong \phi_2$ is an epi.
-  % Morphisms $\pi_i$ ($i \in \set{1,2}$) must not be isos
-  % as otherwise $\phi \cong \phi_i$ is an epi.
   Take the connected closure of the image of $\phi$,
   call it $h'$, and restrict $\phi$ to $h'$ to obtain
   the epi $\phi': g \to h'$ with $\phi = \psi\,\phi'$.
-  % Let $\pi_1' = \pi_1\,\psi$ and $\pi_2' = \pi_2\,\psi$.
-  Let $\pi_i' = \pi_i\,\psi$.
+  Let $\pi_i' = \pi_i\,\psi$ with $i \in \set{1,2}$.
   Take the maximal subset $X_i$ of $\sites_{\anon{h'}}$
-  such that $\pi_{i,\sites}'(X_i)$ is minimal
-  with respect to $\omega_i := \omega(\phi_i)$.
-  % and similarly obtain $X_2$
-  % for $\pi_{2,\sites}'$ and $\omega_2 := \omega(\phi_2)$.
-  Remove from $h'$ all sites $x$ not in $X_i$ % $X_1$ and $X_2$
+  such that $\pi_{i,\sites}'(X_i)$ is an initial segment
+  of $<_i := <_{\phi_i}$.
+  Remove from $h'$ all sites $x$ not in $X_i$
   and then all agents without any sites left.
   Call the result $h''$.
   % NOTE: the following is not true
@@ -252,17 +232,13 @@ and every other extension is overgrown.
   gives us an epi $\phi'': g \to h''$
   with $\phi' = \psi'\,\phi''$.
   Let $\pi_i'' = \pi_i\,\psi\,\psi'$.
-  % and $\pi_2'' = \pi_2\,\psi\,\psi'$.
-  % We have $\omega_1 \sqsupseteq \omega'' \sqsubseteq \omega_2$
-  We have $\omega(\phi'') =: \omega'' \sqsubseteq \omega_i$
+  We have $<_{\phi''} =: {<''} \,\sqsubseteq\, <_i$
   since, by consistency,
   $\pi_{i,\sites}''$ are order-preserving
   and, by construction,
-  $\pi_{i,\sites}''(\sites_{\anon{h''}})$ are minimal
-  with respect to $\omega_i$.
+  $\pi_{i,\sites}''(\sites_{\anon{h''}})$
+  is an initial segment of $<_i$.
 
-  % Because $\pi_1,\pi_2$ are not isos,
-  % Because $\pi_i$ are not isos,
   Assume $\pi_i$ are not isos,
   otherwise $\phi = \phi_i$.
   Then there must be an agent $u$ in $h''$
@@ -271,19 +247,19 @@ and every other extension is overgrown.
   $\sites_{\anon{h_1}} \setminus \pi_{1,\sites}(\sites_{\anon{h}})$
   as $\phi_1$ is an epi.
   It must be that $h_{1,\sites}(x_1)$ is in
-  $\gp_g(\phi_1,\omega_1)(\pi_{1,\agents}''(u))$
+  $\ogp(\phi_1,{<_1})(\pi_{1,\agents}''(u))$
   since $\phi_1$ is mature.
-  As shown above, $\omega'' \sqsubseteq \omega_i$,
+  As shown above, ${<''} \sqsubseteq\, <_i$,
   % By consistency,
   % $\pi_{1,\sites}$ and $\pi_{2,\sites}$ are order-preserving.
   % If, in addition, we have that $\sites_{\anon{h'}}$
-  % is minimal with respect to $\omega_1$ and $\omega_2$,
-  % then $\omega_1 \sqsupseteq \omega' \sqsubseteq \omega_2$.
+  % is minimal with respect to $\ord_1$ and $\ord_2$,
+  % then $\ord_1 \sqsupseteq \ord' \sqsubseteq \ord_2$.
   % as $\sites_{\anon{h'}}$ is minimal
-  % with respect to $\omega_1$ and $\omega_2$.
+  % with respect to $\ord_1$ and $\ord_2$.
   so, by local faithfulness, we have that
-  $h_{1,\sites}(x_1)$ must be in $\gp_g(\phi'',\omega'')(u)$
-  and thus also in $\gp_g(\phi_2,\omega_2)(\pi_{2,\agents}''(u))$.
+  $h_{1,\sites}(x_1)$ must be in $\ogp(\phi'',{<''})(u)$
+  and thus also in $\ogp(\phi_2,{<_2})(\pi_{2,\agents}''(u))$.
   However,
   % $\pi_{2,\agents}'(u)$ does not contain
   the image of $u$ along $\pi_{2,\agents}''$ does not contain
@@ -301,72 +277,21 @@ and every other extension is overgrown.
   % gives us back the codomain of $\phi$ intact.
 \end{proof}
 
-\pagebreak
-
 \begin{theorem}
   Let $g$ be a contact map over $C$,
-  $\gp_g$ a growth policy for $g$,
-  and $\omega$ a consistent assignment of orders
-  to extensions of $g$.
+  $\ord$ a consistent assignment of orders to extensions of $g$
+  and $\ogp$ a growth policy for $g$.
   For all mixtures $m$ and embeddings $\psi: g \to m$,
-  there exists a unique $\phi_i \in \gp_g(\omega)$
+  there exists a unique $\phi_i \in \rfns{\ogp}$
   and $\psi'$ such that $\psi = \psi' \, \phi_i$.
 \end{theorem}
 \begin{proof}
   \emph{Injectivity}:
   We prove that given two decompositions of $\psi$
   as $\gamma_1\,\phi_1$ and $\gamma_2\,\phi_2$
-  with $\phi_1,\phi_2 \in \gp_g(\omega)$,
+  with $\phi_1,\phi_2 \in \rfns{\ogp}$,
   then $\phi_1 = \phi_2$.
   This has been proved in \lem{inj}.
-  % \begin{equation}
-  %   \label{eq:decompositions}
-  %   \tikz[x=1.5cm,y=1.5cm,baseline=2cm]{
-  %     \node (g) at (0,3) {$g$};
-  %     \node (h1) at (3,3) {$h_1$};
-  %     \node (h2) at (0,0) {$h_2$};
-  %     \node (p) at (1,2) {$p$};
-  %     \node (h) at (2,1) {$h$};
-  %     \node (m) at (3,0) {$m$};
-  %     % outer square
-  %     \draw[hom] (g) -- node[above] {$\phi_1$} (h1);
-  %     \draw[hom] (g) -- node[left] {$\phi_2$} (h2);
-  %     \draw[hom] (h2) -- node[below] {$\gamma_2$} (m);
-  %     \draw[hom] (h1) -- node[right] {$\gamma_1$} (m);
-  %     % inner square
-  %     \draw[hom] (p) -- node[onarrow] {$\pi_1$} (h1);
-  %     \draw[hom] (p) -- node[onarrow] {$\pi_2$} (h2);
-  %     \draw[hom] (h1) -- node[onarrow] {$\theta_1$} (h);
-  %     \draw[hom] (h2) -- node[onarrow] {$\theta_2$} (h);
-  %     % mediating arrows
-  %     \draw[hom] (g) -- node[onarrow] {$\phi$} (p);
-  %     \draw[hom,dashed] (h) -- (m);
-  %   }
-  % \end{equation}
-  % Take the minimal glueing $\theta_1,\theta_2$
-  % that factors $\gamma_1,\gamma_2$.
-  % The morphism $\theta = \theta_1\,\phi_1 = \theta_2\,\phi_2$
-  % is an epi because $\phi_1,\phi_2$ are epis
-  % and the images of $h_1,h_2$ coincide.
-  % By consistency, we have $\omega(\phi_1) \sqsubseteq
-  % \omega(\theta) \sqsupseteq \omega(\phi_2)$.
-  % Take the pullback $\pi_1,\pi_2$ of $\theta_1,\theta_2$.
-  % Its mediating arrow $\phi$ is an epi
-  % because of \lem{pullback-epi}.
-  % Then we have $\omega(\phi_1) \sqsupseteq \omega(\phi)
-  % \sqsubseteq \omega(\phi_2)$,
-  % \ie the order in which the sites common to $h_1$ and $h_2$
-  % have been added is fixed.
-  %
-  % Assume $h_1$ is not isomorphic to $h_2$,
-  % otherwise $\phi_1 = \phi_2$.
-  % Then $h_1$ must not be isomorphic to $h$ either.
-  % It follows that $h_1$ must have an agent $u_1$
-  % that has a preimage $u$ via $\pi_1$
-  % and contains a site $x_1 \in \sites_{\anon{h_1}}$
-  % such that $h_1(x_1)$ is in $\gp_g(\phi_1,\omega(\phi_1))(u_1)$
-  % but not in $\gp_g(\phi,\omega(\phi))(u)$.
-  % By local faithfulness we have a contradiction.
 
   \emph{Surjectivity}:
   Take any embedding $\psi$ of $g$ into a mixture $m$.
@@ -380,28 +305,27 @@ and every other extension is overgrown.
   (ii) all agents that have no sites requested by the growth policy.
   Call the result $o$.
   It has the same number of connected components as $g$
-  since $\gp_g$ can only request sites
+  since $\ogp$ can only request sites
   for which there is a path to sites in the image of $\psi$.
   We thus obtain an epi $\phi: g \to o$
-  which is mature with respect to $\gp_g$ since,
+  which is mature with respect to $\ogp$ since,
   by construction, its image contains all sites
-  requested by $\gp_g$ and no other foreign site.
+  requested by $\ogp$ and no other foreign site.
   It is easy to see that $\phi$ factorises $\psi$.
 \end{proof}
 
 
-\pagebreak
 \section{Energy-based refinements}
 
 Given contact graph $C$,
 a set $\shapes$ of energy patterns (contact maps over $C$),
 a rule $r = (r_L,r_R)$,
-and a consistent assignment of orders $\omega$
+and a consistent assignment of orders $\ord$
 to extensions of $r_L$,
-we define our growth policy $\gp$ for $r_L$ as follows.
+we define our growth policy $\gp_\ord$ for $r_L$ as follows.
 Suppose $\phi: r_L \to g$ is an extension of $r_L$.
 To simplify notation,
-we will write $\gp(\phi)$ for $\gp(\phi, \omega(\phi))$.
+we will write $\gp_\ord(\phi)$ for $\gp_\ord(\phi, <_\phi)$.
 We set $\gp(\phi)$ to request
 a site $z$ in $\sitemap_C^{-1}(g_\agents(u))$
 at agent $u$ in $\agents_{\anon{g}}$ iff either
@@ -416,7 +340,7 @@ at agent $u$ in $\agents_{\anon{g}}$ iff either
 % that minimal glueing in the extension)
 \item $\phi$ factorises as $\phi_2\,\phi_1$
   % with $\phi_1: r_L \to g_1$, $\phi_2: g_1 \to g$
-  such that $\omega(\phi_1) \sqsubseteq \omega(\phi)$
+  such that $\ord(\phi_1) \sqsubseteq \ord(\phi)$
   and there is a relevant minimal glueing
   $\gamma: p \to s \gets g_1 :\theta$
   with $p$ in $\shapes$
@@ -458,23 +382,24 @@ so that extensions that avoid minimal glueings are not overgrown.
 
 We refer to the extension $\phi_2: g_1 \to g$
 as a \emph{rewind} of $\phi$
-whenever $\omega(\phi_1) \sqsubseteq \omega(\phi)$
+whenever $\ord(\phi_1) \sqsubseteq \ord(\phi)$
 and say that the request of $z$ at $u$ originates from $u_1$.
 By rewinding extensions we can remember
 which sites have been asked for in the past.
 Symmetrically, we define a growth policy $\comatch{\gp}$ for $r_R$
 by applying the same definition to the inverse rule $\inv{r}$.
-Finally, we define our growth policy $\gp^\shapes$
+Finally, we define our growth policy $\egp$
 as the union of both growth policies,
 that is, $\gp^\shapes(\phi)(u) = \gp(\phi)(u)
 \,\cup\, \comatch{\gp}(\comatch{\phi})(u)$.
 
 \begin{theorem}
   Let $r = (r_L,r_R)$ be a rule
-  and $\omega$ a consistent assignment of orders
+  and $\ord$ a consistent assignment of orders
   to extensions of $r_L$.
   The above $\gp^\shapes$ is indeed a growth policy for $r_L$
-  and the induced refined family of rules $\gp^\shapes_r(\omega)$
+  and the refined family of rules
+  induced by the set of mature extensions $\overline{\gp^\shapes}$
   is $\shapes$-balanced and finite.
 \end{theorem}
 \begin{proof}
